@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detalle de Película - Yosflix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    /* Toast animations */
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, 20px); }
+      10%, 90% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, 20px); }
+    }
+    .animate-fadeInOut {
+      animation: fadeInOut 3s ease forwards;
+    }
+    .animate-fadeOut {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden bg-[#141414] text-white">
+
+  <!-- HEADER (igual que index) -->
+  <header class="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-black to-transparent py-4 px-8 flex items-center justify-between">
+    <div class="flex items-center space-x-6">
+      <div class="text-red-600 text-3xl font-bold rounded-md cursor-pointer" id="logo">Y</div>
+    </div>
+
+    <nav class="hidden md:flex space-x-16 text-xl font-semibold">
+      <a href="yosflix.html" class="px-4 py-2 hover:bg-white hover:text-black rounded-[25px] transition duration-200">Inicio</a>
+      <a href="peliculas.html" class="px-4 py-2 hover:bg-white hover:text-black rounded-[25px] transition duration-200">Películas</a>
+      <a href="mi-lista.html" class="px-4 py-2 hover:bg-white hover:text-black rounded-[25px] transition duration-200">Mi lista</a>
+    </nav>
+
+    <div class="flex items-center space-x-6">
+      <div id="perfil-image" class="w-8 h-8 bg-blue-500 rounded-md cursor-pointer overflow-hidden">
+        <img src="/perfil-imagen.jpg" alt="imagen de perfil" class="w-full h-full object-cover" />
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main id="main-pelicula" class="relative w-full min-h-screen pt-28 overflow-hidden px-8">
+    <div id="main-bg" class="absolute inset-0 bg-cover bg-center opacity-30 -z-10"></div>
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8">
+      
+      <!-- Imagen miniatura o fondo -->
+      <div class="w-full md:w-1/3 rounded-lg overflow-hidden shadow-lg">
+        <img id="pelicula-imagen" src="" alt="Imagen película" class="w-full h-auto object-cover" />
+      </div>
+
+      <!-- Detalles -->
+      <div class="w-full md:w-2/3 text-gray-200 flex flex-col space-y-6">
+        <h1 id="main-title" class="text-4xl font-bold text-white"></h1>
+        <div id="main-tags" class="flex flex-wrap gap-2 text-lg font-semibold text-gray-400"></div>
+        <p id="main-description" class="text-lg leading-relaxed"></p>
+        <p id="main-year" class="text-sm text-gray-400"></p>
+
+        <div class="flex space-x-4 mt-4">
+          <button id="btn-ver" class="flex items-center px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-bold rounded-lg shadow-lg transition duration-300">
+            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Ver
+          </button>
+
+          <button id="btn-agregar" class="flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-lg transition duration-300">
+            Agregar a mi lista
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL logout (igual que index.html) -->
+  <div id="logout-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden">
+    <div class="absolute top-20 right-8 bg-[#141414] p-8 rounded-lg shadow-xl max-w-xs w-full border border-gray-700">
+      <p class="text-xl font-semibold mb-6 text-white text-left">¿Estás seguro que quieres cerrar sesión?</p>
+      <div class="flex flex-col space-y-4">
+        <button id="logout-button" class="bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg w-full">
+          Cerrar sesión
+        </button>
+        <button id="cancel-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg w-full">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/frontend/peliculas.js"></script>
+  <script src="/app.js"></script>
+
+  <script>
+    // Obtener parámetro titulo de URL
+    const params = new URLSearchParams(window.location.search);
+    const titulo = params.get('titulo');
+
+    // Buscar la película por título (case sensitive exacto)
+    const pelicula = window.peliculas?.find(p => p.titulo === titulo);
+
+    // Si no existe, mostrar mensaje o redirigir
+    if (!pelicula) {
+      document.getElementById('main-title').textContent = "Película no encontrada";
+      document.getElementById('main-description').textContent = "Lo sentimos, no pudimos encontrar la película solicitada.";
+      document.getElementById('main-tags').innerHTML = "";
+      document.getElementById('main-year').textContent = "";
+      document.getElementById('pelicula-imagen').src = "";
+    } else {
+      // Mostrar detalles en la página
+      document.getElementById('main-title').textContent = pelicula.titulo;
+      document.getElementById('main-description').textContent = pelicula.descripcion;
+      document.getElementById('main-tags').innerHTML = pelicula.tags.map(t => `<span class="text-gray-300">${t}</span>`).join('<span class="text-gray-400 px-1">•</span>');
+      document.getElementById('main-year').textContent = pelicula.año || pelicula.anio || "";
+      document.getElementById('pelicula-imagen').src = pelicula.imagenFondo || pelicula.miniatura || "";
+
+      // btn-ver dispara evento para app.js que abre el reproductor
+      const btnVer = document.getElementById('btn-ver');
+      btnVer.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('abrirPelicula', { detail: { link: pelicula.link } }));
+      });
+
+      // Funciones para manejar Mi Lista en localStorage
+      const btnAgregar = document.getElementById('btn-agregar');
+
+      function obtenerMiLista() {
+        try {
+          const lista = JSON.parse(localStorage.getItem('miListaPeliculas'));
+          return Array.isArray(lista) ? lista : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function guardarMiLista(lista) {
+        localStorage.setItem('miListaPeliculas', JSON.stringify(lista));
+      }
+
+      function estaEnMiLista(titulo) {
+        const lista = obtenerMiLista();
+        return lista.includes(titulo);
+      }
+
+      function actualizarBoton(titulo) {
+        if (estaEnMiLista(titulo)) {
+          btnAgregar.textContent = 'Quitar de mi lista';
+          btnAgregar.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+          btnAgregar.classList.add('bg-red-600', 'hover:bg-red-700');
+        } else {
+          btnAgregar.textContent = 'Agregar a mi lista';
+          btnAgregar.classList.remove('bg-red-600', 'hover:bg-red-700');
+          btnAgregar.classList.add('bg-gray-600', 'hover:bg-gray-700');
+        }
+      }
+
+      btnAgregar.addEventListener('click', () => {
+        let lista = obtenerMiLista();
+        if (estaEnMiLista(pelicula.titulo)) {
+          // Quitar
+          lista = lista.filter(t => t !== pelicula.titulo);
+          guardarMiLista(lista);
+          mostrarToast(`Se quitó "${pelicula.titulo}" de tu lista.`);
+        } else {
+          // Agregar
+          lista.push(pelicula.titulo);
+          guardarMiLista(lista);
+          mostrarToast(`Se agregó "${pelicula.titulo}" a tu lista.`);
+        }
+        actualizarBoton(pelicula.titulo);
+      });
+
+      // Actualiza el botón cuando carga la página
+      actualizarBoton(pelicula.titulo);
+
+      // Función para mostrar notificaciones (toast)
+      function mostrarToast(mensaje) {
+        const toast = document.createElement('div');
+        toast.textContent = mensaje;
+        toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeInOut';
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add('animate-fadeOut');
+        }, 2500);
+
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+      }
+    }
+
+    // Para que logo "Y" vuelva al index.html
+    document.getElementById('logo').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+  </script>
+
+</body>
+</html>

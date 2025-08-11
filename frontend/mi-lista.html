@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mi Lista - Yosflix</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #000;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  .focus-visible {
+    outline: 3px solid #ef4444;
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<header
+  class="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-black to-transparent py-4 px-8 flex items-center justify-between"
+>
+  <div class="text-red-600 text-3xl font-bold rounded-md cursor-pointer select-none" onclick="location.href='yosflix.html'">Y</div>
+  <div
+    id="perfil-image"
+    class="w-8 h-8 bg-blue-500 rounded-md cursor-pointer overflow-hidden"
+    tabindex="0"
+    title="Perfil"
+    aria-label="Perfil"
+  >
+    <img
+      src="/perfil-imagen.jpg"
+      alt="imagen de perfil"
+      class="w-full h-full object-cover"
+    />
+  </div>
+</header>
+
+<main class="flex-grow pt-20 px-8 max-w-7xl mx-auto w-full">
+
+  <h1 class="text-4xl font-bold mb-2 select-none">Tu lista</h1>
+  <p class="text-gray-400 mb-8 select-none">Películas que agregaste a tu lista</p>
+
+  <div id="mi-lista" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+    <!-- Películas de la lista se inyectan aquí -->
+  </div>
+
+  <p id="no-items" class="mt-4 text-gray-400 text-center hidden select-none">Aún no has agregado películas a tu lista.</p>
+
+</main>
+
+<script src="/frontend/peliculas.js"></script> <!-- Asumo que este contiene window.peliculas -->
+
+<script>
+  const miListaContainer = document.getElementById('mi-lista');
+  const noItemsText = document.getElementById('no-items');
+
+  // Obtiene la lista guardada en localStorage (array de títulos o IDs)
+  function obtenerMiLista() {
+    try {
+      const lista = JSON.parse(localStorage.getItem('miListaPeliculas'));
+      if (Array.isArray(lista)) return lista;
+      return [];
+    } catch {
+      return [];
+    }
+  }
+
+  // Renderiza las películas que estén en mi lista, con tarjetas grandes (igual que peliculas.html)
+  function renderMiLista() {
+    const listaIds = obtenerMiLista();
+    miListaContainer.innerHTML = '';
+
+    if (listaIds.length === 0) {
+      noItemsText.classList.remove('hidden');
+      return;
+    }
+    noItemsText.classList.add('hidden');
+
+    // Buscamos las películas en window.peliculas que correspondan a los IDs de la lista
+    const peliculasEnLista = window.peliculas.filter(peli => listaIds.includes(peli.titulo));
+
+    if (peliculasEnLista.length === 0) {
+      noItemsText.textContent = 'No se encontraron películas en tu lista.';
+      noItemsText.classList.remove('hidden');
+      return;
+    }
+
+    peliculasEnLista.forEach(peli => {
+      const card = document.createElement('div');
+      card.className = "relative rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg";
+      card.tabIndex = 0;
+      card.setAttribute('role', 'link');
+      card.setAttribute('aria-label', `Ver detalles de ${peli.titulo}`);
+
+      card.innerHTML = `
+        <img src="${peli.miniatura}" alt="${peli.titulo}" class="w-full h-[450px, 700px] object-cover" />
+      `;
+
+      card.addEventListener('click', () => {
+        window.location.href = `detalles.html?titulo=${encodeURIComponent(peli.titulo)}`;
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
+      });
+
+      miListaContainer.appendChild(card);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderMiLista();
+  });
+</script>
+
+</body>
+</html>
