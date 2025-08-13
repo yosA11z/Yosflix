@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Detalle de Película - Yosflix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Toast animations */
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            10%, 90% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, 20px); }
+        }
+        .animate-fadeInOut {
+            animation: fadeInOut 3s ease forwards;
+        }
+        .animate-fadeOut {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        /* Estilo para el foco del control remoto */
+        .focused {
+            outline: 3px solid #ef4444; /* Rojo para un foco claro */
+            outline-offset: 4px;
+            box-shadow: 0 0 10px #ef4444;
+            transform: scale(1.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden bg-[#141414] text-white">
+
+    <header class="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-black to-transparent py-4 px-8 flex items-center justify-between">
+        <div class="flex items-center space-x-6">
+            <div class="text-red-600 text-3xl font-bold rounded-md cursor-pointer" id="logo" onclick="location.href='yosflix.html'">Y</div>
+        </div>
+        <nav class="hidden md:flex space-x-16 text-xl font-semibold">
+            <a href="mi-lista.html" class="px-4 py-2 hover:bg-white hover:text-black rounded-[25px] transition duration-200 nav-item" tabindex="0">Mi lista</a>
+        </nav>
+        <div class="flex items-center space-x-6">
+            <div id="perfil-image" class="w-8 h-8 bg-blue-500 rounded-md cursor-pointer overflow-hidden">
+                <img src="perfil-imagen.jpg" alt="imagen de perfil" class="w-full h-full object-cover" />
+            </div>
+        </div>
+    </header>
+
+    <main id="main-pelicula" class="relative w-full min-h-screen pt-28 overflow-hidden px-8">
+        <div id="main-bg" class="absolute inset-0 bg-cover bg-center opacity-30 -z-10"></div>
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8">
+            <div class="w-full md:w-1/3 rounded-lg overflow-hidden shadow-lg">
+                <img id="pelicula-imagen" src="" alt="Imagen película" class="w-full h-auto object-cover" />
+            </div>
+            <div class="w-full md:w-2/3 text-gray-200 flex flex-col space-y-6">
+                <h1 id="main-title" class="text-4xl font-bold text-white"></h1>
+                <div id="main-tags" class="flex flex-wrap gap-2 text-lg font-semibold text-gray-400"></div>
+                <p id="main-description" class="text-lg leading-relaxed"></p>
+                <p id="main-year" class="text-sm text-gray-400"></p>
+                <div class="flex space-x-4 mt-4" id="main-actions">
+                    <button id="btn-ver" class="flex items-center px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-bold rounded-lg shadow-lg transition duration-300 nav-item" tabindex="0">
+                        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Ver
+                    </button>
+                    <button id="btn-agregar" class="flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-lg transition duration-300 nav-item" tabindex="0">
+                        Agregar a mi lista
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="logout-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden">
+        <div class="absolute top-20 right-8 bg-[#141414] p-8 rounded-lg shadow-xl max-w-xs w-full border border-gray-700">
+            <p class="text-xl font-semibold mb-6 text-white text-left">¿Estás seguro que quieres cerrar sesión?</p>
+            <div class="flex flex-col space-y-4">
+                <button id="logout-button" class="bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg w-full nav-item-modal" tabindex="0">
+                    Cerrar sesión
+                </button>
+                <button id="cancel-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg w-full nav-item-modal" tabindex="0">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="peliculas.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lógica de carga de perfil
+            const storedProfile = localStorage.getItem('selectedProfile');
+            if (storedProfile) {
+                const profile = JSON.parse(storedProfile);
+                const perfilImageElement = document.getElementById('perfil-image');
+                if (perfilImageElement) {
+                    const imgElement = perfilImageElement.querySelector('img');
+                    if (imgElement) {
+                        imgElement.src = profile.image;
+                    }
+                }
+            }
+
+            // ---- VARIABLES Y ELEMENTOS ----
+            const logoutModal = document.getElementById('logout-modal');
+            const logoutButton = document.getElementById('logout-button');
+            const cancelButton = document.getElementById('cancel-button');
+            const perfilImage = document.getElementById('perfil-image');
+            const btnVer = document.getElementById('btn-ver');
+            const btnAgregar = document.getElementById('btn-agregar');
+            
+            let currentFocusIndex = 0;
+            let navItems = [];
+            
+            function getNavItems() {
+                if (!logoutModal.classList.contains('hidden')) {
+                    return [logoutButton, cancelButton].filter(item => item !== null);
+                }
+                
+                const mainItems = [
+                    document.querySelector('a[href="mi-lista.html"]'),
+                    btnVer,
+                    btnAgregar
+                ].filter(item => item !== null);
+                return mainItems;
+            }
+
+            function setFocus(index) {
+                navItems = getNavItems();
+                if (navItems.length === 0) return;
+
+                navItems.forEach(item => item.classList.remove('focused'));
+
+                if (index < 0) {
+                    index = navItems.length - 1;
+                } else if (index >= navItems.length) {
+                    index = 0;
+                }
+
+                navItems[index].classList.add('focused');
+                navItems[index].focus();
+                currentFocusIndex = index;
+            }
+
+            // ---- LÓGICA DE DETALLES DE PELÍCULA Y MI LISTA ----
+            const params = new URLSearchParams(window.location.search);
+            const titulo = params.get('titulo');
+            let pelicula;
+
+            if (titulo && window.peliculas) {
+                pelicula = window.peliculas.find(p => p.titulo.toLowerCase().trim() === titulo.toLowerCase().trim());
+            }
+
+            if (pelicula) {
+                document.getElementById('pelicula-imagen').src = pelicula.miniatura || '';
+                document.getElementById('main-title').textContent = pelicula.titulo;
+                document.getElementById('main-description').textContent = pelicula.descripcion;
+                document.getElementById('main-tags').innerHTML = pelicula.tags.map(t => `<span class="text-gray-300">${t}</span>`).join('<span class="text-gray-400 px-1">•</span>');
+                document.getElementById('main-year').textContent = `Año: ${pelicula.año || ''}`;
+                document.getElementById('main-bg').style.backgroundImage = `url('${pelicula.imagenFondo}')`;
+            } else {
+                document.getElementById('main-title').textContent = "Película no encontrada";
+                document.getElementById('main-description').textContent = "Lo sentimos, no pudimos encontrar la película solicitada.";
+                if (btnVer) btnVer.style.display = 'none';
+                if (btnAgregar) btnAgregar.style.display = 'none';
+            }
+
+            // ---- LÓGICA DE MI LISTA ----
+            function obtenerMiLista() {
+                const lista = localStorage.getItem('miLista');
+                return lista ? JSON.parse(lista) : [];
+            }
+            function guardarMiLista(lista) {
+                localStorage.setItem('miLista', JSON.stringify(lista));
+            }
+            function estaEnMiLista(titulo) {
+                return obtenerMiLista().includes(titulo);
+            }
+            function actualizarBoton(titulo) {
+                if (!btnAgregar) return;
+                if (estaEnMiLista(titulo)) {
+                    btnAgregar.textContent = 'Quitar de mi lista';
+                    btnAgregar.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                    btnAgregar.classList.add('bg-red-600', 'hover:bg-red-700');
+                } else {
+                    btnAgregar.textContent = 'Agregar a mi lista';
+                    btnAgregar.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    btnAgregar.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                }
+            }
+            function mostrarToast(mensaje) {
+                const toast = document.createElement('div');
+                toast.textContent = mensaje;
+                toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeInOut';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            if (pelicula) {
+                actualizarBoton(pelicula.titulo);
+                if (btnAgregar) btnAgregar.addEventListener('click', () => {
+                    let lista = obtenerMiLista();
+                    if (estaEnMiLista(pelicula.titulo)) {
+                        lista = lista.filter(t => t !== pelicula.titulo);
+                        mostrarToast(`Se quitó "${pelicula.titulo}" de tu lista.`);
+                    } else {
+                        lista.push(pelicula.titulo);
+                        mostrarToast(`Se agregó "${pelicula.titulo}" a tu lista.`);
+                    }
+                    guardarMiLista(lista);
+                    actualizarBoton(pelicula.titulo);
+                });
+            }
+
+            // ---- LÓGICA DEL REPRODUCTOR (AHORA NAVEGACIÓN) ----
+            if (btnVer && pelicula) btnVer.addEventListener('click', () => {
+                window.location.href = `reproductor.html?video=${encodeURIComponent(pelicula.link)}`;
+            });
+            
+            // ---- LÓGICA DEL MODAL DE CIERRE DE SESIÓN ----
+            function closeLogoutModal() {
+                logoutModal.classList.add('hidden');
+                setFocus(0);
+            }
+            if (perfilImage) perfilImage.addEventListener('click', () => {
+                logoutModal.classList.remove('hidden');
+                setFocus(0);
+            });
+            if (cancelButton) cancelButton.addEventListener('click', closeLogoutModal);
+            if (logoutButton) logoutButton.addEventListener('click', () => {
+                localStorage.removeItem('selectedProfile');
+                window.location.href = 'index.html';
+            });
+            
+            // ---- MANEJADOR DE EVENTOS PRINCIPAL ----
+            document.addEventListener('keydown', (e) => {
+                navItems = getNavItems();
+                if (navItems.length === 0) return;
+
+                if (!logoutModal.classList.contains('hidden')) {
+                    if (e.key === 'ArrowUp' || e.key === 'Up') {
+                        e.preventDefault();
+                        setFocus(currentFocusIndex - 1);
+                    } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+                        e.preventDefault();
+                        setFocus(currentFocusIndex + 1);
+                    }
+                } else {
+                    if (e.key === 'ArrowUp' || e.key === 'Up') {
+                        e.preventDefault();
+                        if (currentFocusIndex === 0) {
+                             setFocus(2);
+                        } else {
+                            setFocus(0);
+                        }
+                    } else if (e.key === 'ArrowDown' || e.key === 'Down') {
+                        e.preventDefault();
+                        if (currentFocusIndex > 0) {
+                            setFocus(0);
+                        } else {
+                            setFocus(1);
+                        }
+                    } else if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                         e.preventDefault();
+                         if (currentFocusIndex === 2) {
+                            setFocus(1);
+                         }
+                    } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                        e.preventDefault();
+                        if (currentFocusIndex === 1) {
+                            setFocus(2);
+                        }
+                    }
+                }
+                
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (navItems[currentFocusIndex]) {
+                        navItems[currentFocusIndex].click();
+                    }
+                } else if (e.key === 'Escape' || e.key === 'Backspace') {
+                    if (!logoutModal.classList.contains('hidden')) {
+                        closeLogoutModal();
+                    } else {
+                        window.history.back();
+                    }
+                }
+            });
+
+            setFocus(0);
+        });
+    </script>
+</body>
+</html>

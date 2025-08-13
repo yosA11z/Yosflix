@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Buscar Películas - Yosflix</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #000;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  .tecla {
+    background-color: #374151;
+    transition: background-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .tecla.focused, .tecla:hover {
+    background-color: #4b5563;
+    outline: 3px solid #ef4444;
+    outline-offset: 2px;
+    transform: scale(1.05);
+  }
+  .pelicula-card.focused,
+  .pelicula-card:focus {
+    outline: 3px solid #ef4444; /* Borde rojo para el foco */
+    outline-offset: 4px;
+    transform: scale(1.05);
+    transition: transform 0.3s ease, outline 0.2s;
+  }
+  .pelicula-card {
+    height: 500px; /* Tamaño grande y fijo para la altura */
+  }
+  .pelicula-card img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+</style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<header
+  class="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-black to-transparent py-4 px-8 flex items-center justify-between"
+>
+  <div class="text-red-600 text-3xl font-bold rounded-md cursor-pointer select-none" onclick="location.href='yosflix.html'">Y</div>
+  <div class="flex items-center space-x-6">
+    <div
+      id="perfil-image-container"
+      class="w-8 h-8 bg-blue-500 rounded-md cursor-pointer overflow-hidden"
+      tabindex="0"
+      title="Perfil"
+      aria-label="Perfil"
+    >
+      <img
+        id="perfil-image"
+        src="/perfil-imagen.jpg"
+        alt="imagen de perfil"
+        class="w-full h-full object-cover"
+      />
+    </div>
+  </div>
+</header>
+
+<main class="flex-grow pt-20 px-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-12">
+
+  <div class="flex flex-col w-full md:w-[480px]">
+    <div class="relative flex w-full mb-6">
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Buscar título, tag o año..."
+        class="flex-grow bg-gray-800 text-white rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-600 text-lg"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <div
+      id="virtual-keyboard"
+      class="bg-gray-900 p-6 rounded-lg shadow-lg z-10 w-full select-none"
+      aria-label="Teclado virtual"
+    >
+      <div class="grid grid-cols-7 gap-3 text-center text-lg">
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="a" tabindex="0">a</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="b" tabindex="0">b</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="c" tabindex="0">c</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="d" tabindex="0">d</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="e" tabindex="0">e</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="f" tabindex="0">f</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="g" tabindex="0">g</button>
+
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="h" tabindex="0">h</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="i" tabindex="0">i</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="j" tabindex="0">j</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="k" tabindex="0">k</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="l" tabindex="0">l</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="m" tabindex="0">m</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="n" tabindex="0">n</button>
+
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="ñ" tabindex="0">ñ</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="o" tabindex="0">o</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="p" tabindex="0">p</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="q" tabindex="0">q</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="r" tabindex="0">r</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="s" tabindex="0">s</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="t" tabindex="0">t</button>
+
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="u" tabindex="0">u</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="v" tabindex="0">v</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="w" tabindex="0">w</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="x" tabindex="0">x</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="y" tabindex="0">y</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="z" tabindex="0">z</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="1" tabindex="0">1</button>
+
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="2" tabindex="0">2</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="3" tabindex="0">3</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="4" tabindex="0">4</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="5" tabindex="0">5</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="6" tabindex="0">6</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="7" tabindex="0">7</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="8" tabindex="0">8</button>
+
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="9" tabindex="0">9</button>
+        <button class="tecla rounded-md py-3 px-5 text-white font-semibold" data-key="0" tabindex="0">0</button>
+        <button class="tecla col-span-2 rounded-md py-3 px-5 text-white font-semibold" data-key="backspace" tabindex="0">⌫</button>
+        <button class="tecla col-span-2 rounded-md py-3 px-5 text-white font-semibold" data-key="space" tabindex="0">Espacio</button>
+
+        <button
+          id="btn-search"
+          class="tecla col-span-1 bg-red-600 rounded-md py-3 px-5 text-white font-semibold transition flex justify-center items-center"
+          aria-label="Buscar"
+          data-key="search"
+          tabindex="0"
+        >
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-1">
+    <div
+      id="search-results"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6"
+    >
+    </div>
+    <p id="no-results" class="mt-4 text-gray-400 text-center hidden select-none">
+      No se encontraron películas.
+    </p>
+  </div>
+
+</main>
+
+<script src="peliculas.js"></script>
+<script>
+  const searchInput = document.getElementById('search-input');
+  const resultsContainer = document.getElementById('search-results');
+  const noResultsText = document.getElementById('no-results');
+  const keyboardGrid = document.getElementById('virtual-keyboard');
+  const allKeys = Array.from(keyboardGrid.querySelectorAll('.tecla'));
+  
+  let currentFocus = null;
+  let currentFocusArea = 'keyboard';
+  
+  // Constantes de navegación para el teclado
+  const KEYBOARD_COLUMNS = 7;
+  const KEYBOARD_NAV_MAP = {
+    'a': { right: 'b', down: 'h' },
+    'b': { left: 'a', right: 'c', down: 'i' },
+    'c': { left: 'b', right: 'd', down: 'j' },
+    'd': { left: 'c', right: 'e', down: 'k' },
+    'e': { left: 'd', right: 'f', down: 'l' },
+    'f': { left: 'e', right: 'g', down: 'm' },
+    'g': { left: 'f', down: 'n', right: 'search-results' },
+
+    'h': { up: 'a', right: 'i', down: 'ñ' },
+    'i': { up: 'b', left: 'h', right: 'j', down: 'o' },
+    'j': { up: 'c', left: 'i', right: 'k', down: 'p' },
+    'k': { up: 'd', left: 'j', right: 'l', down: 'q' },
+    'l': { up: 'e', left: 'k', right: 'm', down: 'r' },
+    'm': { up: 'f', left: 'l', right: 'n', down: 's' },
+    'n': { up: 'g', left: 'm', down: 't', right: 'search-results' },
+    
+    'ñ': { up: 'h', right: 'o', down: 'u' },
+    'o': { up: 'i', left: 'ñ', right: 'p', down: 'v' },
+    'p': { up: 'j', left: 'o', right: 'q', down: 'w' },
+    'q': { up: 'k', left: 'p', right: 'r', down: 'x' },
+    'r': { up: 'l', left: 'q', right: 's', down: 'y' },
+    's': { up: 'm', left: 'r', right: 't', down: 'z' },
+    't': { up: 'n', left: 's', down: '1', right: 'search-results' },
+    
+    'u': { up: 'ñ', right: 'v', down: '2' },
+    'v': { up: 'o', left: 'u', right: 'w', down: '3' },
+    'w': { up: 'p', left: 'v', right: 'x', down: '4' },
+    'x': { up: 'q', left: 'w', right: 'y', down: '5' },
+    'y': { up: 'r', left: 'x', right: 'z', down: '6' },
+    'z': { up: 's', left: 'y', right: '1', down: '7' },
+    '1': { up: 't', left: 'z', down: '8', right: 'search-results' },
+
+    '2': { up: 'u', right: '3', down: '9' },
+    '3': { up: 'v', left: '2', right: '4', down: '0' },
+    '4': { up: 'w', left: '3', right: '5', down: 'backspace' },
+    '5': { up: 'x', left: '4', right: '6', down: 'backspace' },
+    '6': { up: 'y', left: '5', right: '7', down: 'space' },
+    '7': { up: 'z', left: '6', right: '8', down: 'space' },
+    '8': { up: '1', left: '7', down: 'search', right: 'search-results' },
+
+    '9': { up: '2', right: '0' },
+    '0': { up: '3', left: '9', right: 'backspace' },
+    'backspace': { up: '4', left: '0', down: 'search' },
+    'space': { up: '6', left: 'backspace', right: 'search' },
+    'search': { up: '8', left: 'space', right: 'search-results' }
+  };
+
+
+  function fuzzyMatch(str, pattern) {
+    str = str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    pattern = pattern.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (str.includes(pattern)) return true;
+
+    const maxErrors = 1;
+    let errors = 0, i = 0, j = 0;
+    while (i < str.length && j < pattern.length) {
+      if (str[i] === pattern[j]) { i++; j++; }
+      else {
+        errors++;
+        if (errors > maxErrors) return false;
+        if (str.length > pattern.length) i++;
+        else if (str.length < pattern.length) j++;
+        else { i++; j++; }
+      }
+    }
+    errors += (str.length - i) + (pattern.length - j);
+    return errors <= maxErrors;
+  }
+
+  function setFocus(element) {
+    if (currentFocus) {
+      currentFocus.classList.remove('focused');
+    }
+    if (element) {
+      element.classList.add('focused');
+      currentFocus = element;
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+  }
+
+  function navigateKeyboard(direction) {
+    const currentKey = currentFocus.dataset.key;
+    const nextNav = KEYBOARD_NAV_MAP[currentKey]?.[direction];
+    
+    if (nextNav === 'search-results') {
+      const firstCard = document.querySelector('.pelicula-card');
+      if (firstCard) {
+        currentFocusArea = 'results';
+        setFocus(firstCard);
+      }
+    } else if (nextNav) {
+      const nextElement = document.querySelector(`.tecla[data-key="${nextNav}"]`);
+      if (nextElement) {
+        setFocus(nextElement);
+      }
+    }
+  }
+
+  function navigateResults(direction) {
+    const allCards = Array.from(document.querySelectorAll('.pelicula-card'));
+    if (allCards.length === 0 || !currentFocus) {
+      if (direction === 'left') {
+        currentFocusArea = 'keyboard';
+        setFocus(document.querySelector('.tecla[data-key="search"]'));
+      }
+      return;
+    }
+    
+    const currentIndex = allCards.indexOf(currentFocus);
+    const numCols = 2;
+    
+    let nextIndex = currentIndex;
+    switch (direction) {
+      case 'left':
+        if (currentIndex === 0) {
+          currentFocusArea = 'keyboard';
+          setFocus(document.querySelector('.tecla[data-key="search"]'));
+          return;
+        }
+        nextIndex = currentIndex - 1;
+        break;
+      case 'right':
+        nextIndex = (currentIndex + 1) % allCards.length;
+        break;
+      case 'up':
+        if (currentIndex < numCols) {
+          currentFocusArea = 'keyboard';
+          setFocus(document.querySelector('.tecla[data-key="search"]'));
+          return;
+        }
+        nextIndex = currentIndex - numCols;
+        break;
+      case 'down':
+        if (currentIndex + numCols >= allCards.length) {
+          nextIndex = (currentIndex % numCols);
+        } else {
+          nextIndex = currentIndex + numCols;
+        }
+        break;
+    }
+    setFocus(allCards[nextIndex]);
+  }
+
+  function renderPeliculas(lista) {
+    resultsContainer.innerHTML = '';
+    if (lista.length === 0) {
+      noResultsText.classList.remove('hidden');
+      if (currentFocusArea === 'results') {
+        currentFocusArea = 'keyboard';
+        setFocus(allKeys[0]);
+      }
+      return;
+    }
+    noResultsText.classList.add('hidden');
+
+    lista.forEach(peli => {
+      const card = document.createElement('div');
+      card.className = "pelicula-card relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 shadow-lg";
+      card.tabIndex = 0;
+      card.setAttribute('role', 'link');
+      card.setAttribute('aria-label', `Ver detalles de ${peli.titulo}`);
+
+      card.innerHTML = `
+        <img src="${peli.miniatura}" alt="${peli.titulo}" class="w-full h-full object-cover" />
+      `;
+
+      card.addEventListener('click', () => {
+        window.location.href = `detalles.html?titulo=${encodeURIComponent(peli.titulo)}`;
+      });
+
+      resultsContainer.appendChild(card);
+    });
+    // Mantener el foco si se está en el área de resultados
+    if (currentFocusArea === 'results' && !currentFocus) {
+      setFocus(document.querySelector('.pelicula-card'));
+    }
+  }
+
+  function filtrarPeliculas(texto) {
+    if (!texto.trim()) {
+      renderPeliculas(window.peliculas || []);
+      return;
+    }
+    const filtro = texto.trim().toLowerCase();
+
+    const filtradas = (window.peliculas || []).filter(peli => {
+      if (fuzzyMatch(peli.titulo, filtro)) return true;
+      if (peli.tags.some(tag => fuzzyMatch(tag, filtro))) return true;
+      if (peli.año.toString().includes(filtro)) return true;
+      return false;
+    });
+
+    renderPeliculas(filtradas);
+  }
+  
+  function processKey(key) {
+    const start = searchInput.selectionStart;
+    const end = searchInput.selectionEnd;
+    let val = searchInput.value;
+
+    if (key === 'backspace') {
+      if (start === end && start > 0) {
+        searchInput.value = val.slice(0, start - 1) + val.slice(end);
+        searchInput.selectionStart = searchInput.selectionEnd = start - 1;
+      } else {
+        searchInput.value = val.slice(0, start) + val.slice(end);
+        searchInput.selectionStart = searchInput.selectionEnd = start;
+      }
+    } else if (key === 'space') {
+      searchInput.value = val.slice(0, start) + ' ' + val.slice(end);
+      searchInput.selectionStart = searchInput.selectionEnd = start + 1;
+    } else if (key === 'search') {
+      filtrarPeliculas(searchInput.value);
+      return;
+    } else {
+      searchInput.value = val.slice(0, start) + key + val.slice(end);
+      searchInput.selectionStart = searchInput.selectionEnd = start + key.length;
+    }
+    searchInput.focus();
+    filtrarPeliculas(searchInput.value);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+      window.history.back();
+      return;
+    }
+
+    if (currentFocusArea === 'keyboard') {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+          e.preventDefault();
+          navigateKeyboard(e.key.replace('Arrow', '').toLowerCase());
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (currentFocus) {
+            processKey(currentFocus.dataset.key);
+            setFocus(currentFocus);
+          }
+          break;
+      }
+    } else if (currentFocusArea === 'results') {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+          e.preventDefault();
+          navigateResults(e.key.replace('Arrow', '').toLowerCase());
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (currentFocus) {
+            currentFocus.click();
+          }
+          break;
+      }
+    }
+  });
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    const storedProfile = localStorage.getItem('selectedProfile');
+    if (storedProfile) {
+      const profile = JSON.parse(storedProfile);
+      const perfilImageElement = document.getElementById('perfil-image');
+      if (perfilImageElement) {
+        perfilImageElement.src = profile.image;
+      }
+    }
+    renderPeliculas(window.peliculas || []);
+    setFocus(allKeys[0]);
+
+    // Manejar el foco cuando se hace clic
+    document.querySelectorAll('.tecla').forEach(tecla => {
+      tecla.addEventListener('click', e => {
+        setFocus(e.target);
+        processKey(e.target.dataset.key);
+      });
+    });
+    document.getElementById('perfil-image-container').addEventListener('click', e => {
+      window.location.href = 'perfiles.html';
+    });
+  });
+
+</script>
+
+</body>
+</html>

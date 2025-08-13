@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=1920, height=1080, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <title>Yosflix</title>
+
+  <!-- (Opcional) Si tienes estilos adicionales propios, puedes dejar tu styles.css -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ---------- Base fija 1920×1080 para AU9000 ---------- */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;         /* sin scroll en TV */
+      background-color: #141414; /* Netflix-like */
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* ---------- HEADER ---------- */
+    header {
+      position: fixed;
+      top: 0; left: 0;
+      width: 1920px;
+      height: 100px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0));
+      -webkit-user-select: none; user-select: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .brand-badge {
+      width: 48px; height: 48px;
+      background: #e50914;
+      color: #fff;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 28px;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 64px; /* equivalente a space-x-16 */
+      font-size: 22px;
+      font-weight: 700;
+    }
+    nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 25px;
+      text-decoration: none;
+      color: #fff;
+      background: transparent;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    }
+    nav a:focus,
+    nav a:hover {
+      background: #fff;
+      color: #000;
+      transform: translateY(-1px);
+    }
+    .nav-icon {
+      width: 24px; height: 24px;
+      display: inline-block;
+    }
+
+    /* Perfil (top-right) */
+    #perfil-image {
+      width: 48px; height: 48px;
+      border-radius: 8px;
+      background: #3b82f6; /* azul */
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: transform 0.15s ease;
+    }
+    #perfil-image:hover { transform: scale(1.04); }
+    #perfil-image img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+    }
+
+    /* ---------- MAIN (HERO) ---------- */
+    #main-pelicula {
+      position: absolute;
+      top: 100px; /* debajo del header */
+      left: 0;
+      width: 1920px;
+      height: 700px; /* altura fija como tu md:h-[700px] */
+      overflow: hidden;
+      animation: fadeIn 600ms ease-out;
+      background: #141414; /* fallback */
+    }
+    #main-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      will-change: transform, opacity;
+    }
+    /* Gradiente superior para legibilidad */
+    #main-pelicula::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(20,20,20,1) 0%,
+        rgba(20,20,20,0.0) 55%,
+        rgba(20,20,20,0.0) 100%
+      );
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      width: 1920px;
+      display: flex;
+      align-items: end;
+      justify-content: center; /* centra el bloque */
+      padding-bottom: 80px;
+      animation: slideUp 500ms ease-out;
+    }
+
+    .hero-inner {
+      width: 1280px;          /* equivalente a max-w-4xl con un poco más de aire para TV */
+      padding: 0 60px;
+    }
+
+    /* Bloque con fondo negro translúcido (como tu #texto-con-fondo inline) */
+    #texto-con-fondo {
+      background: rgba(0,0,0,0.6);
+      padding: 16px 20px;
+      border-radius: 8px;
+      max-width: 800px;       /* ~40rem */
+    }
+    #main-title {
+      font-size: 56px;        /* text-6xl aprox */
+      line-height: 1.05;
+      margin: 0 0 14px 0;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      text-wrap: balance;
+    }
+    #main-tags {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #d1d5db;
+      font-weight: 700;
+      font-size: 22px;        /* md:text-xl */
+      margin: 0 0 14px 0;
+    }
+    #main-description {
+      color: #e5e7eb;
+      font-size: 20px;        /* md:text-lg */
+      line-height: 1.45;
+      margin: 0 0 28px 0;
+      max-width: 640px;       /* max-w-xl */
+    }
+
+    /* Botones */
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    #btn-ver {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      font-size: 22px;
+      font-weight: 800;
+      background: #b91c1c;        /* rojo-700 */
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+      transition: transform 120ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+    #btn-ver:hover { background: #991b1b; transform: translateY(-1px); }
+    #btn-ver:active { transform: translateY(0); }
+    .btn-play-icon {
+      width: 24px; height: 24px; display: inline-block;
+      fill: currentColor;
+    }
+
+    /* ---------- LISTA ---------- */
+    section.list-wrap {
+      position: absolute;
+      left: 0;
+      top: 100px + 700px; /* no funciona en CSS puro, dejamos calculado abajo como top: 820px */
+    }
+    .list-wrap {
+      top: 820px;                  /* 100 header + 700 hero + 20 margen */
+      width: 1920px;
+      padding: 0 60px 0 60px;
+    }
+    .list-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0 0 18px 0;
+    }
+
+    /* Carrusel horizontal sin scroll visible (lo controlará tu JS si quieres) */
+    #lista-peliculas {
+      display: flex;
+      gap: 16px;
+      padding-bottom: 10px;
+      overflow: hidden;           /* sin barras */
+      -webkit-overflow-scrolling: touch;
+      will-change: transform;
+    }
+    .movie-card {
+      width: 300px;
+      height: 170px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      flex: 0 0 auto;
+      cursor: pointer;
+      transition: transform 120ms ease, filter 120ms ease, outline-color 120ms ease;
+      outline: 4px solid transparent; /* reservamos espacio para el enfoque sin mover el layout */
+    }
+    .movie-card img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .movie-card:hover,
+    .movie-card.is-focused {
+      transform: scale(1.05);
+      filter: brightness(1.05);
+      outline-color: rgba(255,255,255,0.9);
+    }
+
+    /* ---------- MODAL ---------- */
+    #logout-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 2000;
+      display: none; /* hidden por defecto */
+    }
+    .modal-panel {
+      position: absolute;
+      right: 60px; top: 120px;
+      width: 360px;
+      background: #141414;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      animation: fadeIn 200ms ease-out;
+    }
+    .modal-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0 0 18px 0;
+      text-align: left;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      transition: background 160ms ease, transform 120ms ease;
+    }
+    .btn-danger { background: #b91c1c; }
+    .btn-danger:hover { background: #991b1b; }
+    .btn-muted { background: #4b5563; }
+    .btn-muted:hover { background: #374151; }
+
+    /* ---------- Animaciones ---------- */
+    @keyframes fadeIn { from {opacity: 0} to {opacity: 1} }
+    @keyframes slideUp { from {opacity:0; transform: translateY(24px)} to {opacity:1; transform: translateY(0)} }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-badge">Y</div>
+    </div>
+
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="peliculas.html">Películas</a>
+      <a href="mi-lista.html">Mi lista</a>
+      <a href="buscar.html">
+        <!-- Icono lupa -->
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        Buscar
+      </a>
+    </nav>
+
+    <div id="perfil-image">
+      <img src="perfil-imagen.jpg" alt="imagen de perfil">
+    </div>
+  </header>
+
+  <!-- MAIN / HERO -->
+  <main id="main-pelicula">
+    <div id="main-bg"></div>
+
+    <div class="hero-content">
+      <div class="hero-inner">
+        <div id="texto-con-fondo">
+          <h1 id="main-title">Título aquí</h1>
+          <div id="main-tags">Etiquetas</div>
+          <p id="main-description">Descripción aquí</p>
+        </div>
+
+        <div class="hero-actions">
+          <button id="btn-ver" data-url="">
+            <!-- icono play -->
+            <svg class="btn-play-icon" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" fill="currentColor"/>
+            </svg>
+            Ver
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- LISTA -->
+  <section class="list-wrap">
+    <h2 class="list-title">Tu Próxima Película</h2>
+    <div id="lista-peliculas">
+      <!-- Tus tarjetas se insertarán vía JS (peliculas.js / app.js) 
+           Si quieres tarjetas estáticas de fallback, descomenta este bloque:
+      <div class="movie-card"><img src="https://via.placeholder.com/300x170/222/fff?text=1"></div>
+      <div class="movie-card"><img src="https://via.placeholder.com/300x170/333/fff?text=2"></div>
+      <div class="movie-card"><img src="https://via.placeholder.com/300x170/444/fff?text=3"></div>
+      <div class="movie-card"><img src="https://via.placeholder.com/300x170/555/fff?text=4"></div>
+      <div class="movie-card"><img src="https://via.placeholder.com/300x170/666/fff?text=5"></div>
+      -->
+    </div>
+  </section>
+
+  <!-- MODAL Cerrar sesión -->
+  <div id="logout-modal">
+    <div class="modal-panel">
+      <p class="modal-title">¿Estás seguro que quieres cerrar sesión?</p>
+      <div class="modal-actions">
+        <button id="logout-button" class="btn btn-danger">Cerrar sesión</button>
+        <button id="cancel-button" class="btn btn-muted">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- --------- SCRIPTS DE TU PROYECTO (mismo orden) --------- -->
+  <script src="peliculas.js"></script>
+  <script src="app.js"></script>
+
+  <!-- --------- Script mínimo de integración / fallback --------- -->
+  <script>
+    (function() {
+      // 1) Imagen de perfil guardada (mismo comportamiento que tenías)
+      const savedProfile = (function() {
+        try { return JSON.parse(localStorage.getItem('selectedProfile')); }
+        catch(_) { return null; }
+      })();
+
+      const perfilImgEl = document.querySelector('#perfil-image img');
+      if (savedProfile && savedProfile.image && perfilImgEl) {
+        perfilImgEl.src = savedProfile.image;
+        perfilImgEl.alt = 'Imagen de perfil de ' + (savedProfile.name || 'Perfil');
+      }
+
+      // 2) Modal de logout
+      const perfilImage = document.getElementById('perfil-image');
+      const logoutModal = document.getElementById('logout-modal');
+      const cancelButton = document.getElementById('cancel-button');
+      const logoutButton = document.getElementById('logout-button');
+
+      function showModal() { logoutModal.style.display = 'block'; }
+      function hideModal() { logoutModal.style.display = 'none'; }
+
+      if (perfilImage && logoutModal) {
+        perfilImage.addEventListener('click', showModal);
+      }
+      if (cancelButton) cancelButton.addEventListener('click', hideModal);
+      if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+          localStorage.removeItem('selectedProfile');
+          window.location.href = 'index.html';
+        });
+      }
+
+      // 3) Fallback: si app.js no setea el fondo, ponemos uno neutro
+      const bg = document.getElementById('main-bg');
+      if (bg && !bg.style.backgroundImage) {
+        bg.style.backgroundImage = 'url(https://via.placeholder.com/1920x700/000000/ffffff?text=Yosflix)';
+      }
+
+      // 4) Botón "Ver": respeta data-url si app.js lo setea
+      const btnVer = document.getElementById('btn-ver');
+      if (btnVer) {
+        btnVer.addEventListener('click', () => {
+          const url = btnVer.getAttribute('data-url');
+          if (url && typeof url === 'string' && url.trim()) {
+            window.location.href = url;
+          }
+        });
+      }
+
+      // 5) Enfoque visual en la lista (opcional, no interfiere con tus JS)
+      const list = document.getElementById('lista-peliculas');
+      if (list) {
+        list.addEventListener('mouseover', e => {
+          const card = e.target.closest('.movie-card');
+          if (!card) return;
+          list.querySelectorAll('.movie-card').forEach(c => c.classList.remove('is-focused'));
+          card.classList.add('is-focused');
+        });
+        list.addEventListener('mouseleave', () => {
+          list.querySelectorAll('.movie-card').forEach(c => c.classList.remove('is-focused'));
+        });
+      }
+
+      // 6) Tecla Return en TV (si existe tizen)
+      document.addEventListener('keydown', (e) => {
+        if (e.keyCode === 10009 && typeof tizen !== 'undefined') { // RETURN
+          try { tizen.application.getCurrentApplication().exit(); } catch(_) {}
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

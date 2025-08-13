@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1920, height=1080, initial-scale=1" />
+<title>Yosflix - ¿Quién eres?</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="$WEBAPIS/webapis/webapis.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #141414;
+        color: #e5e5e5;
+        margin: 0;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    header {
+        padding: 40px 60px;
+        flex-shrink: 0;
+    }
+    .yosflix-logo-text {
+        color: #e50914;
+        font-weight: 700;
+        font-size: 48px;
+    }
+    main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    h1 {
+        font-size: 42px;
+        font-weight: 600;
+        margin-bottom: 60px;
+        text-align: center;
+    }
+    #profile-container {
+        display: grid;
+        grid-template-columns: repeat(4, 240px);
+        gap: 60px;
+    }
+    .profile-card {
+        transition: transform 0.2s ease, filter 0.2s ease, border 0.2s ease;
+        cursor: pointer;
+        border-radius: 8px;
+        filter: brightness(0.85);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .profile-card.selected,
+    .profile-card:hover {
+        transform: scale(1.05);
+        filter: brightness(1);
+        border: 4px solid #e5e5e5;
+    }
+    .profile-name {
+        margin-top: 12px;
+        font-size: 24px;
+        color: #9ca3af;
+    }
+    .profile-card.selected .profile-name {
+        color: white;
+    }
+    svg {
+        width: 240px;
+        height: 240px;
+    }
+</style>
+</head>
+<body>
+<header>
+    <div class="yosflix-logo-text">Yosflix</div>
+</header>
+<main>
+    <h1>¿Quién eres? Elige tu perfil</h1>
+    <div id="profile-container"></div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const colorsHex = {
+        'red-600': '#dc2626',
+        'amber-500': '#f59e0b',
+        'cyan-500': '#06b6d4',
+        'green-500': '#22c55e',
+    };
+
+    const profiles = [
+        { name: 'Matías', color: 'red-600', image: 'perfil-imagen.jpg' },
+        { name: 'María', color: 'amber-500', image: 'perfil-imagen-maria.jpg' },
+        { name: 'Olga', color: 'cyan-500', image: 'perfil-imagen-olga.jpg' },
+        { name: 'Faiber', color: 'green-500', image: 'perfil-imagen-faiber.jpg' },
+    ];
+
+    const container = document.getElementById('profile-container');
+
+    function createSVG(bgColor) {
+        return `
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="0" width="100" height="100" fill="${bgColor}" rx="8"/>
+                <circle cx="35" cy="40" r="7" fill="#141414"/>
+                <circle cx="65" cy="40" r="7" fill="#141414"/>
+                <path d="M30 70 Q50 85 70 70" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="20" cy="55" r="2" fill="#141414"/>
+                <circle cx="80" cy="55" r="2" fill="#141414"/>
+            </svg>
+        `;
+    }
+
+    profiles.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        card.dataset.index = i;
+        card.dataset.profileName = p.name;
+        card.innerHTML = `
+            ${createSVG(colorsHex[p.color])}
+            <span class="profile-name">${p.name}</span>
+        `;
+        container.appendChild(card);
+    });
+
+    let selectedIndex = 0;
+    const cards = document.querySelectorAll('.profile-card');
+
+    function updateSelection() {
+        cards.forEach((card, i) => {
+            card.classList.toggle('selected', i === selectedIndex);
+        });
+    }
+    updateSelection();
+
+    function selectProfile() {
+        const profile = profiles[selectedIndex];
+        // Guardar perfil en localStorage
+        localStorage.setItem('selectedProfile', JSON.stringify(profile));
+        window.location.href = 'yosflix.html';
+    }
+
+    // Selección con control remoto o teclado
+    document.addEventListener('keydown', (e) => {
+        switch (e.keyCode) {
+            case 37: // izquierda
+                if (selectedIndex > 0) selectedIndex--;
+                updateSelection();
+                break;
+            case 39: // derecha
+                if (selectedIndex < cards.length - 1) selectedIndex++;
+                updateSelection();
+                break;
+            case 13: // enter
+                selectProfile();
+                break;
+            case 10009: // return
+                if (typeof tizen !== 'undefined') {
+                    tizen.application.getCurrentApplication().exit();
+                }
+                break;
+        }
+    });
+
+    // Click con mouse (por si lo usas en PC)
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            selectedIndex = parseInt(card.dataset.index);
+            updateSelection();
+            setTimeout(selectProfile, 150);
+        });
+    });
+});
+</script>
+</body>
+</html>
