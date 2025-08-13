@@ -13,16 +13,6 @@
             color: #fff;
             overflow-x: hidden;
         }
-        .focus-visible {
-            outline: 3px solid #ef4444;
-            outline-offset: 2px;
-        }
-        .pelicula-card.focused,
-        .pelicula-card:focus {
-            outline: 3px solid #ef4444; /* Borde rojo para el foco */
-            outline-offset: 4px;
-            transform: scale(1.05);
-        }
         .pelicula-card img {
             height: 450px;
             border-radius: 0.5rem;
@@ -40,7 +30,6 @@
         <div
             id="perfil-image"
             class="w-8 h-8 bg-blue-500 rounded-md cursor-pointer overflow-hidden"
-            tabindex="0"
             title="Perfil"
             aria-label="Perfil"
         >
@@ -69,9 +58,8 @@
     <script>
         const miListaContainer = document.getElementById('mi-lista');
         const noItemsText = document.getElementById('no-items');
-        let currentFocus = null;
 
-        // Obtiene la lista guardada en localStorage (array de títulos o IDs)
+        // Obtiene la lista guardada en localStorage
         function obtenerMiLista() {
             try {
                 const lista = JSON.parse(localStorage.getItem('miLista'));
@@ -104,8 +92,7 @@
             peliculasEnLista.forEach(peli => {
                 const card = document.createElement('a');
                 card.href = `detalles.html?titulo=${encodeURIComponent(peli.titulo)}`;
-                card.className = "pelicula-card relative rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg focus-visible";
-                card.tabIndex = 0;
+                card.className = "pelicula-card relative rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg";
                 card.setAttribute('aria-label', `Ver detalles de ${peli.titulo}`);
 
                 card.innerHTML = `
@@ -116,66 +103,6 @@
             });
         }
         
-        // Lógica para el foco del control remoto
-        function setFocus(element) {
-            if (currentFocus) {
-                currentFocus.classList.remove('focused');
-            }
-            if (element) {
-                element.classList.add('focused');
-                element.focus();
-                currentFocus = element;
-            }
-        }
-        
-        function findNextElement(direction) {
-            const allCards = Array.from(document.querySelectorAll('.pelicula-card'));
-            if (!currentFocus || allCards.length === 0) return null;
-
-            const currentIndex = allCards.indexOf(currentFocus);
-            let nextIndex = currentIndex;
-
-            if (direction === 'right') {
-                nextIndex = (currentIndex + 1) % allCards.length;
-            } else if (direction === 'left') {
-                nextIndex = (currentIndex - 1 + allCards.length) % allCards.length;
-            } else if (direction === 'down') {
-                const numCols = 4; // Asumiendo 4 columnas para pantallas grandes
-                nextIndex = (currentIndex + numCols) % allCards.length;
-            } else if (direction === 'up') {
-                const numCols = 4;
-                nextIndex = (currentIndex - numCols + allCards.length) % allCards.length;
-            }
-            return allCards[nextIndex];
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (document.querySelectorAll('.pelicula-card').length === 0) return;
-            
-            if (e.key === 'ArrowUp' || e.key === 'Up') {
-                e.preventDefault();
-                const nextElement = findNextElement('up');
-                if (nextElement) setFocus(nextElement);
-            } else if (e.key === 'ArrowDown' || e.key === 'Down') {
-                e.preventDefault();
-                const nextElement = findNextElement('down');
-                if (nextElement) setFocus(nextElement);
-            } else if (e.key === 'ArrowLeft' || e.key === 'Left') {
-                e.preventDefault();
-                const nextElement = findNextElement('left');
-                if (nextElement) setFocus(nextElement);
-            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
-                e.preventDefault();
-                const nextElement = findNextElement('right');
-                if (nextElement) setFocus(nextElement);
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (currentFocus) currentFocus.click();
-            } else if (e.key === 'Escape' || e.key === 'Backspace') {
-                window.history.back();
-            }
-        });
-
         document.addEventListener('DOMContentLoaded', () => {
             renderMiLista();
 
@@ -190,12 +117,6 @@
                         imgElement.src = profile.image;
                     }
                 }
-            }
-
-            // Foco inicial al cargar
-            const firstCard = document.querySelector('.pelicula-card');
-            if (firstCard) {
-                setFocus(firstCard);
             }
         });
     </script>

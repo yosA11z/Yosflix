@@ -7,7 +7,7 @@ const peliculas = [
         año: 2025,
         imagenFondo: "https://www.accioncine.es/wp-content/uploads/2025/02/Culpa-Mia-Londres.jpg",
         miniatura: "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/q0HxfkF9eoa6wSVnzwMhuDSK7ba.jpg",
-        link: "https://archive.org/download/mi.-falla.-londres.-2025.2160p.-4-k.-web.x-265.10bit.-aac-5.1-yts.-mx/My.Fault.London.2025.2160p.4K.WEB.x265.10bit.AAC5.1-%5BYTS.MX%5D.mp4"
+        link: "https://archive.org/download/culpa-mia-londres-2025-web-dl-ligero-1080-p-latino-descargatepelis.-com/Culpa%20M%C3%ADa%20Londres%20%282025%29%20Web-Dl%20Ligero%201080P%20Latino%20Descargatepelis.Com.mp4"
     },
     {
         titulo: "Minecraft: La película",
